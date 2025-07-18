@@ -1,0 +1,161 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String            @id @default(cuid())
+  sessions         Session[]
+  goCardlessTokens GoCardlessToken[]
+  bankAgreements   BankAgreement[]
+  bankAccounts     BankAccount[]
+  firstName        String
+  lastName         String
+  email            String            @unique
+  passwordHash     String
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  userId    String
+  user      User     @relation(references: [id], fields: [userId], onDelete: Cascade)
+}
+
+model GoCardlessToken {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(references: [id], fields: [userId], onDelete: Cascade)
+  accessToken    String
+  accessExpires  DateTime
+  refreshToken   String
+  refreshExpires DateTime
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([userId])
+}
+
+model BankAgreement {
+  id String @id @default(cuid())
+
+  maxHistoricalDays  Int
+  accessValidForDays Int
+  acceptedAt         DateTime?
+  isAccepted         Boolean   @default(false)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  institutionId      String
+  userId             String
+  agreement          String    @unique
+  user               User      @relation(references: [id], fields: [userId], onDelete: Cascade)
+  bankLink           BankLink?
+}
+
+model BankLink {
+  id String @id @default(cuid())
+
+  requisitionId String   @unique
+  status        String
+  link          String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  accountCount Int @default(0)
+
+  agreement   BankAgreement @relation(fields: [agreementId], references: [id])
+  agreementId String        @unique
+
+  bankAccounts BankAccount[]
+}
+
+model BankAccount {
+  id String @id @default(cuid())
+
+  accountId       String  @unique
+  cashAccountType String?
+  currency        String?
+  iban            String? @unique
+  bic             String? @unique
+  owner           String?
+  name            String?
+  product         String?
+  institutionId   String?
+  resourceId      String?
+  status          String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  requisition   BankLink @relation(fields: [requisitionId], references: [id])
+  requisitionId String
+
+  agreementId String
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  balance      AccountBalance?
+  transactions AccountTransaction?
+}
+
+model AccountBalance {
+  id String @id @default(cuid())
+
+  balanceAvailable String?
+  balanceExpected  String?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  account          BankAccount @relation(fields: [accountId], references: [accountId])
+  accountId        String      @unique
+}
+
+model AccountTransaction {
+  id String @id @default(cuid())
+
+  account   BankAccount @relation(fields: [accountId], references: [accountId])
+  accountId String      @unique
+
+  booked  BookedTransaction[]
+  pending PendingTransaction[]
+}
+
+model BookedTransaction {
+  id String @id @default(cuid())
+
+  transactionId   String?   @unique
+  transactionCode String?
+  entryReference  String?
+  creditorName    String?
+  type            String?
+  amount          String
+  valueDate       DateTime?
+
+  createdAt            DateTime            @default(now())
+  AccountTransaction   AccountTransaction? @relation(fields: [accountTransactionId], references: [id])
+  accountTransactionId String?
+}
+
+model PendingTransaction {
+  id String @id @default(cuid())
+
+  transactionId   String?   @unique
+  transactionCode String?
+  entryReference  String?
+  creditorName    String?
+  type            String?
+  amount          String
+  valueDate       DateTime?
+
+  createdAt            DateTime            @default(now())
+  AccountTransaction   AccountTransaction? @relation(fields: [accountTransactionId], references: [id])
+  accountTransactionId String?
+}
