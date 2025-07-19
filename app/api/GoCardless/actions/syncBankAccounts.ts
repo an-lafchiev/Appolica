@@ -6,6 +6,7 @@ import getBankAccounts from "./getBankAccounts";
 import { getAuth } from "@/auth/cookie";
 import { getAccountDetails } from "@/lib/goCardlessClient";
 import { redirect } from "next/navigation";
+import createAccount from "../../Xero/createAccount";
 
 export default async function syncBankAccounts(requisitionId: string) {
   const { user } = await getAuth();
@@ -76,6 +77,16 @@ export default async function syncBankAccounts(requisitionId: string) {
             } catch (error) {
               console.error(`Failed to process account ${account}:`, error);
               throw error;
+            }
+          })
+        );
+
+        await Promise.all(
+          bankAccounts.map((account) => {
+            try {
+              return createAccount(account);
+            } catch (error) {
+              console.error(error);
             }
           })
         );

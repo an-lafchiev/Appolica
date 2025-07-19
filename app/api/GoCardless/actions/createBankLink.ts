@@ -21,7 +21,7 @@ export default async function createBankLink(
     const token = user.goCardlessTokens[0];
 
     const hasBankAgreement = await prisma.bankAgreement.findFirst({
-      where: { institutionId: bankId },
+      where: { institutionId: bankId, userId: user.id },
     });
 
     if (hasBankAgreement) {

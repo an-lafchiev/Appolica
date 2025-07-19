@@ -52,7 +52,9 @@ export const getInstitutions = async (access: string) => {
     },
   });
 
-  if (error) throw new Error("Error fetching institutions");
+  if (error) {
+    throw new Error("Error fetching institutions");
+  }
 
   return [...data, SANDBOX];
 };

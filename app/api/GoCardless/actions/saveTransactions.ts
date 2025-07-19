@@ -43,7 +43,7 @@ export default async function saveTransactions(
         pending: {
           createMany: {
             data: (transactions.pending ?? []).map((tx) => ({
-              transactionId: tx.transactionId,
+              transactionId: account.accountId + tx.transactionId,
               entryReference: tx.entryReference,
               creditorName: tx.creditorName,
               type: tx.proprietaryBankTransactionCode,

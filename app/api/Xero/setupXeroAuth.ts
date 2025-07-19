@@ -5,7 +5,7 @@ import { addSecondsToNow } from "@/helpers/formatDateNow";
 import { isTokenExpiringSoon } from "@/helpers/isTokenExpiring";
 import { SESSION_REFRESH_INTERVAL_MS } from "@/lib/constants";
 import { prisma } from "@/lib/prisma";
-import { exchangeCodeForToken } from "@/lib/xero/xeroAuth";
+import { exchangeCodeForToken, refreshXeroToken } from "@/lib/xero/xeroAuth";
 import xero from "@/lib/xero/xeroClient";
 import { redirect } from "next/navigation";
 
@@ -24,6 +24,9 @@ export default async function setupXeroAuth(code: string) {
   const accessExpires = addSecondsToNow(expires_in || 0);
 
   const SESSION_MAX_DURATION_MS = SESSION_REFRESH_INTERVAL_MS * 4; // 60 days
+  await xero.updateTenants();
+
+  const xeroTenantId = xero.tenants[0].tenantId;
 
   await prisma.xeroToken.upsert({
     where: { userId: user.id },
@@ -42,6 +45,7 @@ export default async function setupXeroAuth(code: string) {
       refreshExpires: new Date(Date.now() + SESSION_MAX_DURATION_MS),
       updatedAt: now,
       tokenId: id_token,
+      tenantId: xeroTenantId,
     },
   });
 
@@ -86,9 +90,11 @@ export async function getValidXeroToken(
     return tokenRecord.accessToken;
   }
 
-  if (tokenRecord.accessExpires > now) {
+  if (tokenRecord.refreshExpires > now) {
     try {
-      const { access_token, id_token, expires_in } = await xero.refreshToken();
+      const { access_token, id_token, expires_in } = await refreshXeroToken(
+        tokenRecord.refreshToken
+      );
 
       if (access_token) {
         const now = new Date();

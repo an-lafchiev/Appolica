@@ -27,5 +27,7 @@ export default async function feedAccountData(
     );
   } catch (error) {
     console.error(error);
+  } finally {
+    revalidatePath("/dashboard");
   }
 }
