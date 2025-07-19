@@ -5,7 +5,6 @@ import { getInstitutions } from "@/lib/goCardlessClient";
 import { DashboardProvider } from "./dashboardContext";
 import { prisma } from "@/lib/prisma";
 import { mapBankList } from "@/helpers/mapBankList";
-import feedAccountData from "../api/GoCardless/actions/feedAccountData";
 
 export default async function AuthenticatedLayout({
   children,
@@ -40,10 +39,6 @@ export default async function AuthenticatedLayout({
     (account) => !account.balance && !account.transactions
   );
 
-  if (filteredBankAccounts.length > 0) {
-    await feedAccountData(filteredBankAccounts);
-  }
-
   return (
     <div className="min-h-screen bg-gray-50">
       <DashboardProvider
@@ -51,6 +46,7 @@ export default async function AuthenticatedLayout({
         institutions={institutions}
         connectedBanks={connectedBanks}
         bankAccounts={bankAccounts}
+        filteredBankAccounts={filteredBankAccounts}
         bankList={bankList}
       >
         <Nav />

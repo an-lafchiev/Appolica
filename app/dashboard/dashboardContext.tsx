@@ -12,6 +12,7 @@ const DashboardProvider = ({
   children,
   bankList,
   bankAccounts,
+  filteredBankAccounts,
   connectedBanks,
 }: DashboardProviderProps) => {
   const [showBalance, setShowBalance] = useState(true);
@@ -30,6 +31,7 @@ const DashboardProvider = ({
     user,
     institutions,
     showBalance,
+    filteredBankAccounts,
     currentView,
     bankAccounts,
     selectedAccount,
@@ -70,6 +72,7 @@ interface DashboardContextType {
   selectedAccount: BankAccountWithRelations | null;
   bankList: MappedBank[];
   bankAccounts: BankAccountWithRelations[];
+  filteredBankAccounts: BankAccountWithRelations[];
   connectedBanks: BankLink[];
   setSelectedAccount: (account: BankAccountWithRelations) => void;
   setCurrentView: (view: "dashboard" | "account-details") => void;
@@ -90,6 +93,7 @@ interface DashboardProviderProps {
   bankList: MappedBank[];
   bankAccounts: BankAccountWithRelations[];
   connectedBanks: BankLink[];
+  filteredBankAccounts: BankAccountWithRelations[];
   institutions: Instituion[];
 }
 

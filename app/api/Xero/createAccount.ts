@@ -1,23 +1,11 @@
 "use server";
 
 import { getAuth } from "@/auth/cookie";
-import { XeroToken } from "@/lib/generated/prisma";
+import { mapToken } from "@/helpers/mapXeroToken";
 import { prisma } from "@/lib/prisma";
 import xeroClient from "@/lib/xero/xeroClient";
-import {
-  Account,
-  AccountType,
-  CurrencyCode,
-  TokenSetParameters,
-} from "xero-node";
+import { Account, AccountType, CurrencyCode } from "xero-node";
 
-function mapToken(token: XeroToken): TokenSetParameters {
-  return {
-    access_token: token.accessToken,
-    id_token: token.tokenId as string,
-    refresh_token: token.refreshToken,
-  };
-}
 export default async function createAccount(accountId: string) {
   const { user } = await getAuth();
 
@@ -37,10 +25,15 @@ export default async function createAccount(accountId: string) {
   try {
     const formattedAccount: Account = {
       code: bankAccount.cashAccountType || "Appolica",
-      name: bankAccount.name || "Unknown Account",
+      name:
+        `${bankAccount.name} - ${bankAccount.institutionId}` ||
+        "Unknown Account",
       type: AccountType.BANK,
       bankAccountNumber: bankAccount.iban || bankAccount.accountId,
-      currencyCode: (bankAccount.currency || "BGN") as unknown as CurrencyCode,
+      currencyCode: "BGN" as unknown as CurrencyCode,
+      /*  [{"Message":"The current organisation is not subscribed to currency 'EUR'."} 
+      Needs multi-tenant, which is premium plan supported
+      */
       description: "Appolica GoCardless bank account",
     };
 

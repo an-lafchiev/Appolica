@@ -7,9 +7,10 @@ import syncBankAccounts from "../api/GoCardless/actions/syncBankAccounts";
 import { useDashboard } from "./dashboardContext";
 import AccountDetails from "./AccountDetails";
 import setupXeroAuth from "../api/Xero/setupXeroAuth";
+import feedAccountData from "../api/GoCardless/actions/feedAccountData";
 
 const Dashboard = () => {
-  const { currentView } = useDashboard();
+  const { currentView, filteredBankAccounts } = useDashboard();
 
   const searchParams = useSearchParams();
   const ref = searchParams.get("ref");
@@ -31,6 +32,14 @@ const Dashboard = () => {
       })();
     }
   }, [xeroCode, xeroQuery]);
+
+  useEffect(() => {
+    (async () => {
+      if (filteredBankAccounts.length > 0) {
+        await feedAccountData(filteredBankAccounts);
+      }
+    })();
+  }, [filteredBankAccounts.length, filteredBankAccounts]);
 
   if (currentView === "dashboard") {
     return <DashboardView />;

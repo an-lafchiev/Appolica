@@ -92,9 +92,8 @@ export async function getValidXeroToken(
 
   if (tokenRecord.refreshExpires > now) {
     try {
-      const { access_token, id_token, expires_in } = await refreshXeroToken(
-        tokenRecord.refreshToken
-      );
+      const { access_token, id_token, expires_in, refresh_token } =
+        await refreshXeroToken(tokenRecord.refreshToken);
 
       if (access_token) {
         const now = new Date();
@@ -106,6 +105,7 @@ export async function getValidXeroToken(
             accessExpires: newAccessExpires,
             updatedAt: now,
             tokenId: id_token,
+            refreshToken: refresh_token, // refesh token is rotated on every refresh
           },
         });
         return xeroToken.accessToken;
