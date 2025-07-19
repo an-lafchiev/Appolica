@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { AlertCircleIcon, ArrowLeft } from "lucide-react";
 import { Button } from "../components/ui/button";
 import {
   Card,
@@ -16,19 +16,30 @@ import { signIn } from "@/auth/actions/sign-in";
 import { EMPTY_FORM_STATE } from "@/auth/validations/formState";
 import FormField from "../components/ui/formField";
 import SubmitButton from "../components/SubmitButton";
+import buildXeroConsent from "../api/Xero/buildXeroConsent";
+import { Alert, AlertTitle, AlertDescription } from "../components/ui/alert";
 
 export default function SignIn() {
-  const [{ fieldErrors, status, timestamp }, action] = useActionState(
+  const [{ fieldErrors, status, timestamp, message }, action] = useActionState(
     signIn,
     EMPTY_FORM_STATE
   );
   const router = useRouter();
 
+  console.log(status);
+  console.log(message);
+
   useEffect(() => {
-    if (status === "SUCCESS") {
-      router.push("/dashboard");
-    }
-  }, [status, timestamp, router]);
+    (async () => {
+      if (status === "SUCCESS") {
+        if (message === "buildXeroConsent") {
+          await buildXeroConsent();
+        } else {
+          router.push("/dashboard");
+        }
+      }
+    })();
+  }, [status, timestamp, router, message]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
@@ -80,7 +91,15 @@ export default function SignIn() {
               className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold h-11 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
             />
           </form>
-
+          {status === "ERROR" && (
+            <Alert variant="destructive" className="mt-4">
+              <AlertCircleIcon />
+              <AlertTitle>{message}</AlertTitle>
+              <AlertDescription>
+                <p>Please enter your information and try again.</p>
+              </AlertDescription>
+            </Alert>
+          )}
           <div className="mt-6 text-center">
             <p className="text-gray-600">
               Don&apos;t have an account?

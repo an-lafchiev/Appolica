@@ -18,6 +18,11 @@ import {
   saveToken,
 } from "@/app/api/GoCardless/actions/token";
 import { generateToken } from "@/lib/goCardlessClient";
+import {
+  deleteXeroToken,
+  getValidXeroToken,
+  getXeroTokenInfo,
+} from "@/app/api/Xero/setupXeroAuth";
 
 const signIn = async (formState: FormState, formData: FormData) => {
   try {
@@ -28,6 +33,7 @@ const signIn = async (formState: FormState, formData: FormData) => {
 
     const user = await prisma.user.findUnique({
       where: { email },
+      include: {},
     });
 
     if (!user) {
@@ -45,6 +51,7 @@ const signIn = async (formState: FormState, formData: FormData) => {
 
     await setSessionCookie(sessionToken, session.expiresAt);
     const goCardlessToken = await getTokenInfo(user.id);
+    const xeroToken = await getXeroTokenInfo(user.id);
 
     revalidatePath("/");
 
@@ -61,6 +68,18 @@ const signIn = async (formState: FormState, formData: FormData) => {
 
     if (!goCardlessToken.accessValid || goCardlessToken.accessExpiringSoon) {
       await getValidAccessToken(user.id);
+    }
+
+    if (!xeroToken) {
+      return toFormState("SUCCESS", "buildXeroConsent");
+    }
+
+    if (!xeroToken.refreshValid) {
+      await deleteXeroToken(user.id);
+    }
+
+    if (!xeroToken.accessValid || xeroToken.accessExpiringSoon) {
+      await getValidXeroToken(user.id);
     }
 
     return toFormState("SUCCESS", "Login successful");

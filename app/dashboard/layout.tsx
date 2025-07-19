@@ -22,6 +22,11 @@ export default async function AuthenticatedLayout({
   const institutions = await getInstitutions(token.accessToken);
 
   const connectedBanks = await prisma.bankLink.findMany({
+    where: {
+      agreement: {
+        userId: user.id,
+      },
+    },
     include: { agreement: true },
   });
 

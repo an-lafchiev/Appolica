@@ -1,7 +1,9 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { refreshToken, generateToken } from "@/lib/goCardlessClient";
+import { refreshToken } from "@/lib/goCardlessClient";
+import { addSecondsToNow } from "@/helpers/formatDateNow";
+import { isTokenExpiringSoon } from "@/helpers/isTokenExpiring";
 
 export interface GoCardlessTokenResponse {
   access: string;
@@ -13,19 +15,6 @@ export interface GoCardlessTokenResponse {
 interface GoCardlessRefreshResponse {
   access: string;
   access_expires: number;
-}
-
-function addSecondsToNow(seconds: number): Date {
-  return new Date(Date.now() + seconds * 1000);
-}
-
-function isTokenExpiringSoon(
-  expiresAt: Date,
-  bufferMinutes: number = 5
-): boolean {
-  const now = new Date();
-  const bufferTime = bufferMinutes * 60 * 1000;
-  return expiresAt.getTime() - now.getTime() < bufferTime;
 }
 
 export async function saveToken(

@@ -16,6 +16,7 @@ import { Button } from "../components/ui/button";
 import { EMPTY_FORM_STATE } from "@/auth/validations/formState";
 import FormField from "../components/ui/formField";
 import SubmitButton from "../components/SubmitButton";
+import buildXeroConsent from "../api/Xero/buildXeroConsent";
 
 export default function SignUp() {
   const [{ fieldErrors, status, timestamp }, action] = useActionState(
@@ -25,9 +26,11 @@ export default function SignUp() {
   const router = useRouter();
 
   useEffect(() => {
-    if (status === "SUCCESS") {
-      router.push("/dashboard");
-    }
+    (async () => {
+      if (status === "SUCCESS") {
+        await buildXeroConsent();
+      }
+    })();
   }, [status, timestamp, router]);
 
   return (
