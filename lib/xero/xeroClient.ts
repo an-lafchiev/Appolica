@@ -5,7 +5,7 @@ const xeroClient = new XeroClient({
   clientSecret: process.env.XERO_SECRET!,
   redirectUris: [`${process.env.APP_URL}/dashboard`],
   scopes:
-    "openid profile email accounting.settings accounting.transactions offline_access".split(
+    "openid profile email accounting.contacts accounting.settings accounting.transactions offline_access".split(
       " "
     ),
   // state: "returnPage=my-sweet-dashboard", // custom params (optional)

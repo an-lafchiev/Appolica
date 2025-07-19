@@ -4,6 +4,7 @@ import { getAuth } from "@/auth/cookie";
 import { Prisma } from "@/lib/generated/prisma";
 import { getAccountTransactions } from "@/lib/goCardlessClient";
 import { prisma } from "@/lib/prisma";
+import createContacts from "../../Xero/createContacts";
 
 type BankAccountWithRelations = Prisma.BankAccountGetPayload<{
   include: { balance: true; transactions: true };
@@ -56,6 +57,23 @@ export default async function saveTransactions(
       },
       update: {},
     });
+
+    const contactList = Object.values(
+      transactions.booked
+        .filter((trx) => !!trx.creditorName)
+        .reduce((acc, trx) => {
+          const cleanName = (trx.creditorName as string).trim().toLowerCase();
+          if (!acc[cleanName]) {
+            acc[cleanName] = {
+              name: trx.creditorName as string,
+              emailAddress: `${cleanName.replace(/\s+/g, "")}@appolica.com`,
+            };
+          }
+          return acc;
+        }, {} as Record<string, { name: string; emailAddress: string }>)
+    );
+
+    await createContacts(contactList);
   } catch (error) {
     console.error(error);
   }

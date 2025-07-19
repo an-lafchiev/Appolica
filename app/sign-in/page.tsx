@@ -26,9 +26,6 @@ export default function SignIn() {
   );
   const router = useRouter();
 
-  console.log(status);
-  console.log(message);
-
   useEffect(() => {
     (async () => {
       if (status === "SUCCESS") {

@@ -14,13 +14,13 @@ export default async function feedAccountData(
   bankAccounts: BankAccountWithRelations[]
 ) {
   try {
-    await Promise.all(
+    await Promise.allSettled(
       bankAccounts.map((account) => {
         return saveTransactions(account);
       })
     );
 
-    await Promise.all(
+    await Promise.allSettled(
       bankAccounts.map((account) => {
         return saveBalance(account);
       })
