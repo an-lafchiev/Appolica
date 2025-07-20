@@ -51,7 +51,7 @@ DATABASE_URL="file:./dev.db"
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/your-username/your-repo-name.git
+   git clone https://github.com/an-lafchiev/Appolica.git
    cd your-repo-name
    ```
 
@@ -75,7 +75,7 @@ DATABASE_URL="file:./dev.db"
 
 ## ⏰ Cron Job Setup (Vercel)
 
-To automate backend tasks (e.g., syncing transactions), you can use [Vercel Cron Jobs](https://vercel.com/docs/cron-jobs/overview). Here's how to configure it:
+To automate backend tasks (e.g., syncing transactions), you can use [Vercel Cron Jobs](https://vercel.com/docs/cron-jobs/quickstart). Here's how to configure it:
 
 ### 1. Add `vercel.json` to your project root:
 
