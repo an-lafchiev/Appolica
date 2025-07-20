@@ -83,7 +83,7 @@ To automate backend tasks (e.g., syncing transactions), you can use [Vercel Cron
 {
   "cron": [
     {
-      "path": "/api/cron",
+      "path": "/api/sync",
       "schedule": "0 9 * * *",
       "headers": {
         "x-cron-authorization": "YOUR_SECRET"
