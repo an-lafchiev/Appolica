@@ -57,20 +57,20 @@ export default async function createContacts(contactList: Contact[]) {
     );
 
     if (body.contacts) {
-      await Promise.allSettled(
-        body.contacts.map((contact) => {
-          if (contact.contactID) {
-            return prisma.contact.upsert({
-              where: { contactId: contact.contactID },
-              create: {
-                contactId: contact.contactID,
-                name: contact.name as string,
-              },
-              update: {},
-            });
-          }
-        })
-      );
+      for (const contact of body.contacts) {
+        if (contact.contactID) {
+          await prisma.contact.upsert({
+            where: { contactId: contact.contactID },
+            create: {
+              contactId: contact.contactID,
+              name: contact.name as string,
+            },
+            update: {},
+          });
+        }
+      }
+
+      return body.contacts;
     }
   } catch (err) {
     console.log(`Error creating Contact: ${err}}`);

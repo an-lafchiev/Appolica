@@ -24,16 +24,28 @@ export default async function saveTransactions(
       token
     );
 
+    const seen = new Set();
+
+    // sandbox id limitation
+    const filteredTransactions = transactions.booked.filter((trx) => {
+      if (!trx.internalTransactionId) return false;
+      if (seen.has(trx.internalTransactionId)) return false;
+
+      seen.add(trx.internalTransactionId);
+      return true;
+    });
+
     await prisma.accountTransaction.upsert({
       where: { accountId: account.accountId },
       create: {
         accountId: account.accountId,
         booked: {
           createMany: {
-            data: (transactions.booked ?? []).map((tx) => ({
+            data: (filteredTransactions ?? []).map((tx) => ({
               transactionId: account.accountId + tx.internalTransactionId, // sandbox id limitation
               entryReference: tx.entryReference,
               creditorName: tx.creditorName,
+              debtorName: tx.debtorName,
               type: tx.proprietaryBankTransactionCode,
               amount: tx.transactionAmount.amount,
               valueDate: new Date(tx.valueDate || Date.now()),
@@ -47,6 +59,7 @@ export default async function saveTransactions(
               transactionId: account.accountId + tx.transactionId,
               entryReference: tx.entryReference,
               creditorName: tx.creditorName,
+              debtorName: tx.debtorName,
               type: tx.proprietaryBankTransactionCode,
               amount: tx.transactionAmount.amount,
               valueDate: new Date(tx.valueDate || Date.now()),
@@ -59,18 +72,18 @@ export default async function saveTransactions(
     });
 
     const contactList = Object.values(
-      transactions.booked
-        .filter((trx) => !!trx.creditorName)
-        .reduce((acc, trx) => {
-          const cleanName = (trx.creditorName as string).trim().toLowerCase();
-          if (!acc[cleanName]) {
-            acc[cleanName] = {
-              name: trx.creditorName as string,
-              emailAddress: `${cleanName.replace(/\s+/g, "")}@appolica.com`,
-            };
-          }
-          return acc;
-        }, {} as Record<string, { name: string; emailAddress: string }>)
+      transactions.booked.reduce((acc, trx) => {
+        const cleanName = (trx.creditorName || trx.debtorName || "Unknown")
+          .trim()
+          .toLowerCase();
+        if (!acc[cleanName]) {
+          acc[cleanName] = {
+            name: trx.creditorName || trx.debtorName || "Unknown",
+            emailAddress: `${cleanName.replace(/\s+/g, "")}@appolica.com`,
+          };
+        }
+        return acc;
+      }, {} as Record<string, { name: string; emailAddress: string }>)
     );
 
     await createContacts(contactList);

@@ -157,9 +157,12 @@ model BookedTransaction {
   transactionCode String?
   entryReference  String?
   creditorName    String?
+  debtorName      String?
   type            String?
   amount          String
   valueDate       DateTime?
+
+  xeroSynced Boolean @default(false)
 
   createdAt            DateTime            @default(now())
   AccountTransaction   AccountTransaction? @relation(fields: [accountTransactionId], references: [id])

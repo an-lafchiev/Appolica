@@ -24,10 +24,11 @@ export default async function createAccount(accountId: string) {
   if (!tenantId) return;
   try {
     const formattedAccount: Account = {
-      code: bankAccount.cashAccountType || "Appolica",
+      code: `GC-${bankAccount.accountId.slice(0, 6).toUpperCase()}`,
       name:
-        `${bankAccount.name} - ${bankAccount.institutionId}` ||
-        "Unknown Account",
+        `${bankAccount.name} - ${bankAccount.institutionId} - ${(
+          bankAccount.iban as string
+        ).slice(-4)}` || "Unknown Account",
       type: AccountType.BANK,
       bankAccountNumber: bankAccount.iban || bankAccount.accountId,
       currencyCode: "BGN" as unknown as CurrencyCode,
