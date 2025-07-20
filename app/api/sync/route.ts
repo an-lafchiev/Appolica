@@ -206,7 +206,10 @@ export async function GET(request: Request) {
 
         const bookedUnsyncedTransactions =
           await prisma.bookedTransaction.findMany({
-            where: { accountTransactionId: accountTransaction?.id },
+            where: {
+              accountTransactionId: accountTransaction?.id,
+              xeroSynced: false,
+            },
           });
 
         const mappedTransactionPromises = bookedUnsyncedTransactions.map(
