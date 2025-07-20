@@ -13,14 +13,8 @@ import {
 import { prisma } from "@/lib/prisma";
 import getXeroBankAccounts from "./getXeroBankAccounts";
 import createContacts from "./createContacts";
-import { AccountTransaction, BookedTransaction } from "@/lib/generated/prisma";
-import { formatDate } from "@/helpers/formatDate";
-
-function buildLineItemDescription(trx: BookedTransaction): string {
-  return `TrxCode: ${trx.transactionCode} Payee: ${trx.creditorName} | Ref: ${
-    trx.entryReference
-  } | Date: ${formatDate(trx.valueDate)}`;
-}
+import { AccountTransaction } from "@/lib/generated/prisma";
+import { buildLineItemDescription } from "@/helpers/buildLineItemDescription";
 
 export default async function createXeroBankTransactions() {
   const { user } = await getAuth();

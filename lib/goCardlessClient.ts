@@ -159,14 +159,16 @@ export const getAccountBalance = async (accountId: string, access: string) => {
 };
 export const getAccountTransactions = async (
   accountId: string,
-  access: string
+  access: string,
+  dateRangeFrom?: string,
+  dateRangeTo?: string
 ) => {
   const dateTo = new Date();
   const dateFrom = new Date();
   dateFrom.setDate(dateTo.getDate() - 30);
 
-  const dateFromStr = dateFrom.toISOString().split("T")[0];
-  const dateToStr = dateTo.toISOString().split("T")[0];
+  const dateFromStr = dateRangeFrom || dateFrom.toISOString().split("T")[0];
+  const dateToStr = dateRangeTo || dateTo.toISOString().split("T")[0];
 
   const { data, error } = await GET("/api/v2/accounts/{id}/transactions/", {
     params: {
